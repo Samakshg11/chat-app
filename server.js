@@ -32,7 +32,7 @@ app.use(errorMiddleware); // error handle
 
 // db + server start
 connectDB().then(() => {
-  const PORT = process.env.PORT || 5000; // port set
+  const PORT = process.env.PORT || 3000; // port set
   server.listen(PORT, () =>
     console.log(`Server running on ${PORT}`) // server start
   );
