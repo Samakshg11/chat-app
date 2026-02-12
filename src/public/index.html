@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Chat UI</title>
+
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #101010;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .chat-container {
+      width: 400px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #4caf50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .user-setup {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .user-setup input {
+      width: 48%;
+      padding: 6px;
+      margin-right: 2%;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      margin: 6px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 70%;
+    }
+
+    .sent {
+      background: #dcf8c6;
+      align-self: flex-end;
+    }
+
+    .received {
+      background: #eee;
+      align-self: flex-start;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    .chat-input input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      outline: none;
+    }
+
+    .chat-input button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+  <div class="chat-header">Simple Chat</div>
+
+  <div class="user-setup">
+    <input type="text" id="sender" placeholder="Sender ID">
+    <input type="text" id="receiver" placeholder="Receiver ID">
+    <button type="button" onclick="connectSocket()">Connect</button>
+  </div>
+
+  <div class="chat-messages" id="messages"></div>
+
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button type="button" onclick="sendMessage()">Send</button>
+  </div>
+
+</div>
+
+<script>
+  const socket = io("http://localhost:5000");
+
+  let senderId = "";
+  let receiverId = "";
+
+  function connectSocket() {
+
+    senderId = document.getElementById("sender").value;
+    receiverId = document.getElementById("receiver").value;
+
+    if (!senderId || !receiverId) {
+      alert("Enter both IDs");
+      return;
+    }
+
+    socket.emit("join", senderId);
+    alert("Connected to realtime chat");
+  }
+
+  function sendMessage() {
+
+    const messageInput = document.getElementById("messageInput");
+    const messages = document.getElementById("messages");
+
+    const message = messageInput.value;
+
+    if (!message) return;
+
+    fetch("http://localhost:5000/api/chat/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: senderId,
+        receiver: receiverId,
+        message: message
+      })
+    });
+
+    // show own message
+    const div = document.createElement("div");
+    div.classList.add("message", "sent");
+    div.innerText = message;
+    messages.appendChild(div);
+
+    messageInput.value = "";
+  }
+
+  socket.on("newMessage", (data) => {
+
+    const messages = document.getElementById("messages");
+
+    const div = document.createElement("div");
+    div.classList.add("message", "received");
+    div.innerText = data.message;
+
+    messages.appendChild(div);
+  });
+
+</script>
+
+</body>
+</html>
