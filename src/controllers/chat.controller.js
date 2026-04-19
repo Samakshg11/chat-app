@@ -37,7 +37,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   thread.lastMessageTime = new Date();
   await thread.save();
 
-  // 🔥 realtime emit (correct Map usage)
+  // 🔥 realtime emit
   const receiverSocket = onlineUsers.get(receiver);
 
   if (receiverSocket) {
