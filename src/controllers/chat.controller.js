@@ -20,7 +20,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   // agar thread nahi mila to create karo
   if (!thread) {
     thread = await Thread.create({
-      participants: [sender, receiver],
+      participants: [sender, not-reciever],
     });
   }
 
