@@ -7,3 +7,4 @@
 - checkpoint 6
 - checkpoint 7
 - checkpoint 8
+- checkpoint 2
