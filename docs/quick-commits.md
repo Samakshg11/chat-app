@@ -13,3 +13,4 @@
 - checkpoint 5
 - checkpoint 6
 - checkpoint 7
+- checkpoint 8
