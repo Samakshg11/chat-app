@@ -79,11 +79,16 @@ exports.getMessages = asyncHandler(async (req, res) => {
   }
 
   const { safePage, safeLimit } = getPagination(page, limit);
+  const skip = (safePage - 1) * safeLimit;
 
-  const messages = await Chat.find({ thread: threadId })
-    .sort({ createdAt: -1 })
-    .skip((safePage - 1) * safeLimit)
-    .limit(safeLimit);
+  const [messages, total] = await Promise.all([
+    Chat.find({ thread: threadId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .lean(),
+    Chat.countDocuments({ thread: threadId }),
+  ]);
 
   res.status(200).json({
     data: messages,
@@ -91,6 +96,8 @@ exports.getMessages = asyncHandler(async (req, res) => {
       page: safePage,
       limit: safeLimit,
       count: messages.length,
+      total,
+      hasMore: skip + messages.length < total,
     },
   });
 });
