@@ -13,6 +13,8 @@ const getPagination = (page, limit) => {
   return { safePage, safeLimit };
 };
 
+const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
+
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
@@ -30,17 +32,19 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Sender and receiver must be different" });
   }
 
-  // thread find
-  let thread = await Thread.findOne({
-    participants: { $all: [sender, receiver] },
-  });
+  const participantsKey = buildParticipantsKey(sender, receiver);
 
-  // create a new thread when participants do not have one already
-  if (!thread) {
-    thread = await Thread.create({
-      participants: [sender, receiver],
-    });
-  }
+  // create/find thread with race-safe upsert
+  const thread = await Thread.findOneAndUpdate(
+    { participantsKey },
+    {
+      $setOnInsert: {
+        participants: [sender, receiver],
+        participantsKey,
+      },
+    },
+    { upsert: true, new: true }
+  );
 
   // chat save
   const chat = await Chat.create({
