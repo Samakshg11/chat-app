@@ -19,6 +19,10 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid sender or receiver id" });
   }
 
+  if (sender === receiver) {
+    return res.status(400).json({ message: "Sender and receiver must be different" });
+  }
+
   // thread find
   let thread = await Thread.findOne({
     participants: { $all: [sender, receiver] },
