@@ -1,7 +1,10 @@
+const mongoose = require("mongoose");
 const Chat = require("../models/chat");
 const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { getIO, onlineUsers } = require("../socket/socket");
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
@@ -9,6 +12,10 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 
   if (!sender || !receiver || !message) {
     return res.status(400).json({ message: "Missing fields" });
+  }
+
+  if (!isValidObjectId(sender) || !isValidObjectId(receiver)) {
+    return res.status(400).json({ message: "Invalid sender or receiver id" });
   }
 
   // thread find
@@ -50,6 +57,10 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
   const { page = 1, limit = 20 } = req.query;
+
+  if (!isValidObjectId(threadId)) {
+    return res.status(400).json({ message: "Invalid thread id" });
+  }
 
   const messages = await Chat.find({ thread: threadId })
     .sort({ createdAt: -1 })
