@@ -9,8 +9,9 @@ const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
+  const normalizedMessage = typeof message === "string" ? message.trim() : "";
 
-  if (!sender || !receiver || !message) {
+  if (!sender || !receiver || !normalizedMessage) {
     return res.status(400).json({ message: "Missing fields" });
   }
 
@@ -34,12 +35,12 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   const chat = await Chat.create({
     sender,
     receiver,
-    message,
+    message: normalizedMessage,
     thread: thread._id,
   });
 
   // thread update
-  thread.lastMessage = message;
+  thread.lastMessage = normalizedMessage;
   thread.lastMessageTime = new Date();
   await thread.save();
 
