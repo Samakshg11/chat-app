@@ -81,5 +81,12 @@ exports.getMessages = asyncHandler(async (req, res) => {
     .skip((safePage - 1) * safeLimit)
     .limit(safeLimit);
 
-  res.status(200).json(messages);
+  res.status(200).json({
+    data: messages,
+    pagination: {
+      page: safePage,
+      limit: safeLimit,
+      count: messages.length,
+    },
+  });
 });
