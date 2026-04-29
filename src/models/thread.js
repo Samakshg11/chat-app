@@ -1,20 +1,28 @@
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
+
 const threadSchema = new mongoose.Schema(
   {
     participants: [
       {
-        type: mongoose.Schema.Types.ObjectId, // user id
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
       },
     ],
+    participantsKey: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
     lastMessage: {
-      type: String, // last msg
+      type: String,
     },
     lastMessageTime: {
-      type: Date, // last msg ka time
+      type: Date,
     },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
+
 module.exports = mongoose.model("Thread", threadSchema);
