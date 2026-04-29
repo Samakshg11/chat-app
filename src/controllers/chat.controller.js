@@ -6,6 +6,13 @@ const { getIO, onlineUsers } = require("../socket/socket");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
+const getPagination = (page, limit) => {
+  const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
+  const safeLimit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 20));
+
+  return { safePage, safeLimit };
+};
+
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
@@ -67,10 +74,12 @@ exports.getMessages = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid thread id" });
   }
 
+  const { safePage, safeLimit } = getPagination(page, limit);
+
   const messages = await Chat.find({ thread: threadId })
     .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
+    .skip((safePage - 1) * safeLimit)
+    .limit(safeLimit);
 
   res.status(200).json(messages);
 });
