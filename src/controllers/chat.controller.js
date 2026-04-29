@@ -5,7 +5,6 @@ const { getIO, onlineUsers } = require("../socket/socket");
 
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
-
   const { sender, receiver, message } = req.body;
 
   if (!sender || !receiver || !message) {
@@ -17,9 +16,9 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     participants: { $all: [sender, receiver] },
   });
 
-  // agar thread nahi mila to create karo
+  // create a new thread when participants do not have one already
   if (!thread) {
-
+    thread = await Thread.create({
       participants: [sender, receiver],
     });
   }
@@ -37,7 +36,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   thread.lastMessageTime = new Date();
   await thread.save();
 
-  // 🔥 realtime emit
+  // realtime emit
   const receiverSocket = onlineUsers.get(receiver);
 
   if (receiverSocket) {
@@ -49,7 +48,6 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 
 // get messages
 exports.getMessages = asyncHandler(async (req, res) => {
-
   const { threadId } = req.params;
   const { page = 1, limit = 20 } = req.query;
 
