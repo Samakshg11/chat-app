@@ -117,6 +117,11 @@ exports.getMessages = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid thread id" });
   }
 
+  const threadExists = await Thread.exists({ _id: threadId });
+  if (!threadExists) {
+    return res.status(404).json({ message: "Thread not found" });
+  }
+
   const { safePage, safeLimit } = getPagination(page, limit);
   const skip = (safePage - 1) * safeLimit;
 
