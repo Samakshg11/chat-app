@@ -167,6 +167,22 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
     }
   );
 
+  const senderIds = await Chat.distinct("sender", {
+    thread: threadId,
+    receiver: normalizedUserId,
+    isRead: true,
+  });
+
+  senderIds.forEach((senderId) => {
+    const senderSocket = onlineUsers.get(String(senderId));
+    if (senderSocket) {
+      getIO().to(senderSocket).emit("threadRead", {
+        threadId,
+        readBy: normalizedUserId,
+      });
+    }
+  });
+
   res.status(200).json({
     message: "Thread marked as read",
     updatedCount: result.modifiedCount || 0,
