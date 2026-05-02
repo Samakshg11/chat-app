@@ -1,7 +1,10 @@
 const { Server } = require("socket.io");
+const mongoose = require("mongoose");
 
 let io;
 const onlineUsers = new Map(); 
+const socketToUser = new Map();
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
 function initSocket(server) {
 
@@ -13,14 +16,20 @@ function initSocket(server) {
     console.log("User Connected"); // connect hua
 
     socket.on("join", (userId) => {
-      onlineUsers.set(userId, socket.id); // user ko map me add kra
+      const normalizedUserId = String(userId);
+      if (!isValidObjectId(normalizedUserId)) {
+        return;
+      }
+
+      onlineUsers.set(normalizedUserId, socket.id); // user ko map me add kra
+      socketToUser.set(socket.id, normalizedUserId);
     });
 
     socket.on("disconnect", () => {
-      for (const [key, value] of onlineUsers.entries()) {
-        if (value === socket.id) {
-          onlineUsers.delete(key); // disconnect pe remove
-        }
+      const userId = socketToUser.get(socket.id);
+      if (userId) {
+        onlineUsers.delete(userId); // disconnect pe remove
+        socketToUser.delete(socket.id);
       }
       console.log("User Disconnected"); 
     });
