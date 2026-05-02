@@ -111,7 +111,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 // get messages
 exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
-  const { page = 1, limit = 20 } = req.query;
+  const { page = 1, limit = 20, order = "desc" } = req.query;
 
   if (!isValidObjectId(threadId)) {
     return res.status(400).json({ message: "Invalid thread id" });
@@ -124,10 +124,11 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
   const { safePage, safeLimit } = getPagination(page, limit);
   const skip = (safePage - 1) * safeLimit;
+  const sortDirection = order === "asc" ? 1 : -1;
 
   const [messages, total] = await Promise.all([
     Chat.find({ thread: threadId })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: sortDirection })
       .skip(skip)
       .limit(safeLimit)
       .lean(),
