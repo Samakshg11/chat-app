@@ -36,5 +36,7 @@ const chatSchema = new mongoose.Schema(
 );
 
 chatSchema.index({ thread: 1, createdAt: -1 });
+chatSchema.index({ thread: 1, receiver: 1, isRead: 1 });
+chatSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Chat", chatSchema);

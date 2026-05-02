@@ -25,4 +25,6 @@ const threadSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+threadSchema.index({ participants: 1, lastMessageTime: -1 });
+
 module.exports = mongoose.model("Thread", threadSchema);
