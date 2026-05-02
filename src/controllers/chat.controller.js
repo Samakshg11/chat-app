@@ -18,6 +18,40 @@ const getPagination = (page, limit) => {
 
 const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
 
+exports.getThreads = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { page = 1, limit = 20 } = req.query;
+  const normalizedUserId = toObjectIdString(userId);
+
+  if (!isValidObjectId(normalizedUserId)) {
+    return badRequest(res, "Invalid user id");
+  }
+
+  const { safePage, safeLimit } = getPagination(page, limit);
+  const skip = (safePage - 1) * safeLimit;
+
+  const query = { participants: normalizedUserId };
+  const [threads, total] = await Promise.all([
+    Thread.find(query)
+      .sort({ lastMessageTime: -1, updatedAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .lean(),
+    Thread.countDocuments(query),
+  ]);
+
+  res.status(200).json({
+    data: threads,
+    pagination: {
+      page: safePage,
+      limit: safeLimit,
+      count: threads.length,
+      total,
+      hasMore: skip + threads.length < total,
+    },
+  });
+});
+
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
