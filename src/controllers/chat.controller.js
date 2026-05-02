@@ -5,6 +5,9 @@ const asyncHandler = require("../utils/asyncHandler");
 const { getIO, onlineUsers } = require("../socket/socket");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+const toObjectIdString = (value) => String(value);
+const normalizeMessage = (value) => (typeof value === "string" ? value.trim() : "");
+const badRequest = (res, message) => res.status(400).json({ message });
 
 const getPagination = (page, limit) => {
   const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
@@ -18,28 +21,30 @@ const buildParticipantsKey = (sender, receiver) => [String(sender), String(recei
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
-  const normalizedMessage = typeof message === "string" ? message.trim() : "";
+  const normalizedSender = toObjectIdString(sender);
+  const normalizedReceiver = toObjectIdString(receiver);
+  const normalizedMessage = normalizeMessage(message);
 
   if (!sender || !receiver || !normalizedMessage) {
-    return res.status(400).json({ message: "Missing fields" });
+    return badRequest(res, "Missing fields");
   }
 
-  if (!isValidObjectId(sender) || !isValidObjectId(receiver)) {
-    return res.status(400).json({ message: "Invalid sender or receiver id" });
+  if (!isValidObjectId(normalizedSender) || !isValidObjectId(normalizedReceiver)) {
+    return badRequest(res, "Invalid sender or receiver id");
   }
 
-  if (sender === receiver) {
-    return res.status(400).json({ message: "Sender and receiver must be different" });
+  if (normalizedSender === normalizedReceiver) {
+    return badRequest(res, "Sender and receiver must be different");
   }
 
-  const participantsKey = buildParticipantsKey(sender, receiver);
+  const participantsKey = buildParticipantsKey(normalizedSender, normalizedReceiver);
 
   // create/find thread with race-safe upsert
   const thread = await Thread.findOneAndUpdate(
     { participantsKey },
     {
       $setOnInsert: {
-        participants: [sender, receiver],
+        participants: [normalizedSender, normalizedReceiver],
         participantsKey,
       },
     },
@@ -48,8 +53,8 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 
   // chat save
   const chat = await Chat.create({
-    sender,
-    receiver,
+    sender: normalizedSender,
+    receiver: normalizedReceiver,
     message: normalizedMessage,
     thread: thread._id,
   });
