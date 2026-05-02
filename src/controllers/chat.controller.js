@@ -146,3 +146,29 @@ exports.getMessages = asyncHandler(async (req, res) => {
     },
   });
 });
+
+exports.markThreadAsRead = asyncHandler(async (req, res) => {
+  const { threadId } = req.params;
+  const { userId } = req.body;
+  const normalizedUserId = toObjectIdString(userId);
+
+  if (!isValidObjectId(threadId) || !isValidObjectId(normalizedUserId)) {
+    return badRequest(res, "Invalid thread id or user id");
+  }
+
+  const result = await Chat.updateMany(
+    {
+      thread: threadId,
+      receiver: normalizedUserId,
+      isRead: false,
+    },
+    {
+      $set: { isRead: true },
+    }
+  );
+
+  res.status(200).json({
+    message: "Thread marked as read",
+    updatedCount: result.modifiedCount || 0,
+  });
+});
