@@ -23,6 +23,18 @@ function initSocket(server) {
 
       onlineUsers.set(normalizedUserId, socket.id); // user ko map me add kra
       socketToUser.set(socket.id, normalizedUserId);
+      io.emit("presence:update", { onlineCount: onlineUsers.size });
+    });
+
+    socket.on("leave", () => {
+      const userId = socketToUser.get(socket.id);
+      if (!userId) {
+        return;
+      }
+
+      onlineUsers.delete(userId);
+      socketToUser.delete(socket.id);
+      io.emit("presence:update", { onlineCount: onlineUsers.size });
     });
 
     socket.on("disconnect", () => {
@@ -30,6 +42,7 @@ function initSocket(server) {
       if (userId) {
         onlineUsers.delete(userId); // disconnect pe remove
         socketToUser.delete(socket.id);
+        io.emit("presence:update", { onlineCount: onlineUsers.size });
       }
       console.log("User Disconnected"); 
     });
