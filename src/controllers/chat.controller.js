@@ -105,7 +105,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     getIO().to(receiverSocket).emit("newMessage", chat);
   }
 
-  res.status(200).json(chat);
+  res.status(201).json(chat);
 });
 
 // get messages
