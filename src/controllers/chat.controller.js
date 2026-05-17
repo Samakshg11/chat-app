@@ -24,6 +24,10 @@ const buildPagination = ({ page, limit, count, total }) => ({
 });
 
 const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
+const ensureThreadExists = async (threadId) => {
+  const thread = await Thread.findById(threadId).select("_id").lean();
+  return thread;
+};
 
 exports.getThreads = asyncHandler(async (req, res) => {
   const { userId } = req.params;
@@ -123,8 +127,8 @@ exports.getMessages = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid thread id" });
   }
 
-  const threadExists = await Thread.exists({ _id: threadId });
-  if (!threadExists) {
+  const thread = await ensureThreadExists(threadId);
+  if (!thread) {
     return res.status(404).json({ message: "Thread not found" });
   }
 
@@ -164,6 +168,10 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
 
   if (!isValidObjectId(threadId) || !isValidObjectId(normalizedUserId)) {
     return badRequest(res, "Invalid thread id or user id");
+  }
+  const thread = await ensureThreadExists(threadId);
+  if (!thread) {
+    return res.status(404).json({ message: "Thread not found" });
   }
 
   const result = await Chat.updateMany(
