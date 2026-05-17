@@ -99,7 +99,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   await thread.save();
 
   // realtime emit
-  const receiverSocket = onlineUsers.get(receiver);
+  const receiverSocket = onlineUsers.get(normalizedReceiver);
 
   if (receiverSocket) {
     getIO().to(receiverSocket).emit("newMessage", chat);
@@ -127,7 +127,7 @@ exports.getMessages = asyncHandler(async (req, res) => {
   const sortDirection = order === "asc" ? 1 : -1;
 
   const [messages, total] = await Promise.all([
-    Chat.find({ thread: threadId })
+    Chat.find({ thread: threadId})
       .sort({ createdAt: sortDirection })
       .skip(skip)
       .limit(safeLimit)
