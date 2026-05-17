@@ -50,13 +50,34 @@ exports.getThreads = asyncHandler(async (req, res) => {
       .lean(),
     Thread.countDocuments(query),
   ]);
+  const threadIds = threads.map((thread) => thread._id);
+  const unreadCounts = await Chat.aggregate([
+    {
+      $match: {
+        thread: { $in: threadIds },
+        receiver: new mongoose.Types.ObjectId(normalizedUserId),
+        isRead: false,
+      },
+    },
+    {
+      $group: {
+        _id: "$thread",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+  const unreadByThread = new Map(unreadCounts.map((row) => [String(row._id), row.count]));
+  const threadsWithUnread = threads.map((thread) => ({
+    ...thread,
+    unreadCount: unreadByThread.get(String(thread._id)) || 0,
+  }));
 
   res.status(200).json({
-    data: threads,
+    data: threadsWithUnread,
     pagination: buildPagination({
       page: safePage,
       limit: safeLimit,
-      count: threads.length,
+      count: threadsWithUnread.length,
       total,
     }),
   });
