@@ -173,33 +173,30 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
   if (!thread) {
     return res.status(404).json({ message: "Thread not found" });
   }
+  const unreadFilter = {
+    thread: threadId,
+    receiver: normalizedUserId,
+    isRead: false,
+  };
+  const senderIds = await Chat.distinct("sender", unreadFilter);
 
   const result = await Chat.updateMany(
-    {
-      thread: threadId,
-      receiver: normalizedUserId,
-      isRead: false,
-    },
+    unreadFilter,
     {
       $set: { isRead: true },
     }
   );
-
-  const senderIds = await Chat.distinct("sender", {
-    thread: threadId,
-    receiver: normalizedUserId,
-    isRead: true,
-  });
-
-  senderIds.forEach((senderId) => {
-    const senderSocket = onlineUsers.get(String(senderId));
-    if (senderSocket) {
-      getIO().to(senderSocket).emit("threadRead", {
-        threadId,
-        readBy: normalizedUserId,
-      });
-    }
-  });
+  if ((result.modifiedCount || 0) > 0) {
+    senderIds.forEach((senderId) => {
+      const senderSocket = onlineUsers.get(String(senderId));
+      if (senderSocket) {
+        getIO().to(senderSocket).emit("threadRead", {
+          threadId,
+          readBy: normalizedUserId,
+        });
+      }
+    });
+  }
 
   res.status(200).json({
     message: "Thread marked as read",
