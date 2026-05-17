@@ -44,7 +44,7 @@ exports.getThreads = asyncHandler(async (req, res) => {
   const query = { participants: normalizedUserId };
   const [threads, total] = await Promise.all([
     Thread.find(query)
-      .sort({ lastMessageTime: -1, updatedAt: -1 })
+      .sort({ lastMessageTime: -1, updatedAt: -1, _id: -1 })
       .skip(skip)
       .limit(safeLimit)
       .lean(),
@@ -149,7 +149,7 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
   const [messages, total] = await Promise.all([
     Chat.find({ thread: threadId})
-      .sort({ createdAt: sortDirection })
+      .sort({ createdAt: sortDirection, _id: sortDirection })
       .skip(skip)
       .limit(safeLimit)
       .lean(),
