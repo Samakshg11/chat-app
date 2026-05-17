@@ -15,6 +15,13 @@ const getPagination = (page, limit) => {
 
   return { safePage, safeLimit };
 };
+const buildPagination = ({ page, limit, count, total }) => ({
+  page,
+  limit,
+  count,
+  total,
+  hasMore: (page - 1) * limit + count < total,
+});
 
 const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
 
@@ -42,13 +49,12 @@ exports.getThreads = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     data: threads,
-    pagination: {
+    pagination: buildPagination({
       page: safePage,
       limit: safeLimit,
       count: threads.length,
       total,
-      hasMore: skip + threads.length < total,
-    },
+    }),
   });
 });
 
@@ -142,13 +148,12 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     data: messages,
-    pagination: {
+    pagination: buildPagination({
       page: safePage,
       limit: safeLimit,
       count: messages.length,
       total,
-      hasMore: skip + messages.length < total,
-    },
+    }),
   });
 });
 
