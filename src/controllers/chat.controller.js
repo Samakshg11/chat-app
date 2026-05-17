@@ -104,9 +104,15 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   });
 
   // thread update
-  thread.lastMessage = normalizedMessage;
-  thread.lastMessageTime = new Date();
-  await thread.save();
+  await Thread.updateOne(
+    { _id: thread._id },
+    {
+      $set: {
+        lastMessage: normalizedMessage,
+        lastMessageTime: new Date(),
+      },
+    }
+  );
 
   // realtime emit
   const receiverSocket = onlineUsers.get(normalizedReceiver);
