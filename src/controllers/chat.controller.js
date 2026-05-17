@@ -124,7 +124,12 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
   const { safePage, safeLimit } = getPagination(page, limit);
   const skip = (safePage - 1) * safeLimit;
-  const sortDirection = order === "asc" ? 1 : -1;
+  const normalizedOrder = typeof order === "string" ? order.toLowerCase() : "desc";
+
+  if (normalizedOrder !== "asc" && normalizedOrder !== "desc") {
+    return badRequest(res, "Invalid order. Use 'asc' or 'desc'");
+  }
+  const sortDirection = normalizedOrder === "asc" ? 1 : -1;
 
   const [messages, total] = await Promise.all([
     Chat.find({ thread: threadId})
