@@ -162,15 +162,19 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 // get messages
 exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
-  const { page = 1, limit = 20, order = "desc" } = req.query;
+  const { page = 1, limit = 20, order = "desc", userId } = req.query;
+  const normalizedUserId = userId ? toObjectIdString(userId) : null;
 
-  if (!isValidObjectId(threadId)) {
-    return res.status(400).json({ message: "Invalid thread id" });
+  if (!isValidObjectId(threadId) || (normalizedUserId && !isValidObjectId(normalizedUserId))) {
+    return badRequest(res, "Invalid thread id or user id");
   }
 
-  const thread = await ensureThreadExists(threadId);
+  const thread = await ensureThreadWithParticipants(threadId);
   if (!thread) {
-    return res.status(404).json({ message: "Thread not found" });
+    return notFound(res, "Thread not found");
+  }
+  if (normalizedUserId && !isParticipant(thread, normalizedUserId)) {
+    return res.status(403).json({ message: "You are not a participant in this thread" });
   }
 
   const { safePage, safeLimit } = getPagination(page, limit);
