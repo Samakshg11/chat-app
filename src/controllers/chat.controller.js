@@ -178,8 +178,9 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 // get messages
 exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
-  const { page = 1, limit = 20, order = "desc", userId } = req.query;
+  const { page = 1, limit = 20, order = "desc", userId, markAsRead = "false" } = req.query;
   const normalizedUserId = userId ? toObjectIdString(userId) : null;
+  const shouldMarkAsRead = markAsRead === "true";
 
   if (!isValidObjectId(threadId) || (normalizedUserId && !isValidObjectId(normalizedUserId))) {
     return badRequest(res, "Invalid thread id or user id");
@@ -210,6 +211,16 @@ exports.getMessages = asyncHandler(async (req, res) => {
       .lean(),
     Chat.countDocuments({ thread: threadId }),
   ]);
+  if (shouldMarkAsRead && normalizedUserId) {
+    await Chat.updateMany(
+      {
+        thread: threadId,
+        receiver: normalizedUserId,
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+  }
 
   res.status(200).json({
     data: messages,
