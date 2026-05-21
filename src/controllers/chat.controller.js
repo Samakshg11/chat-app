@@ -65,6 +65,17 @@ exports.getThreads = asyncHandler(async (req, res) => {
     Thread.countDocuments(query),
   ]);
   const threadIds = threads.map((thread) => thread._id);
+  if (threadIds.length === 0) {
+    return res.status(200).json({
+      data: [],
+      pagination: buildPagination({
+        page: safePage,
+        limit: safeLimit,
+        count: 0,
+        total,
+      }),
+    });
+  }
   const unreadCounts = await Chat.aggregate([
     {
       $match: {
