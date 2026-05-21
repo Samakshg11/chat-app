@@ -95,6 +95,8 @@ exports.getThreads = asyncHandler(async (req, res) => {
   const threadsWithUnread = threads.map((thread) => ({
     ...thread,
     unreadCount: unreadByThread.get(String(thread._id)) || 0,
+    otherParticipantId:
+      thread.participants?.find((participantId) => String(participantId) !== normalizedUserId) || null,
   }));
 
   res.status(200).json({
