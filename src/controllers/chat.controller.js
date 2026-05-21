@@ -80,7 +80,7 @@ exports.getThreads = asyncHandler(async (req, res) => {
     {
       $match: {
         thread: { $in: threadIds },
-        receiver: new mongoose.Types.ObjectId(normalizedUserId),
+        receiver: toObjectId(normalizedUserId),
         isRead: false,
       },
     },
