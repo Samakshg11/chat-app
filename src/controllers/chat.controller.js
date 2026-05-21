@@ -107,6 +107,9 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   if (!sender || !receiver || !normalizedMessage) {
     return badRequest(res, "Missing fields");
   }
+  if (normalizedMessage.length > MAX_MESSAGE_LENGTH) {
+    return badRequest(res, `Message exceeds ${MAX_MESSAGE_LENGTH} characters`);
+  }
 
   if (!isValidObjectId(normalizedSender) || !isValidObjectId(normalizedReceiver)) {
     return badRequest(res, "Invalid sender or receiver id");
