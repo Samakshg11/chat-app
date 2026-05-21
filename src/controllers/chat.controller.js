@@ -36,6 +36,12 @@ const ensureThreadExists = async (threadId) => {
   const thread = await Thread.findById(threadId).select("_id").lean();
   return thread;
 };
+const ensureThreadWithParticipants = async (threadId) => {
+  const thread = await Thread.findById(threadId).select("_id participants").lean();
+  return thread;
+};
+const isParticipant = (thread, userId) =>
+  Array.isArray(thread?.participants) && thread.participants.some((participantId) => String(participantId) === userId);
 
 exports.getThreads = asyncHandler(async (req, res) => {
   const { userId } = req.params;
