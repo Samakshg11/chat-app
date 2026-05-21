@@ -4,14 +4,22 @@ const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { getIO, onlineUsers } = require("../socket/socket");
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+const MAX_MESSAGE_LENGTH = 4000;
+
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const toObjectIdString = (value) => String(value);
-const normalizeMessage = (value) => (typeof value === "string" ? value.trim() : "");
+const normalizeMessage = (value) =>
+  (typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "");
 const badRequest = (res, message) => res.status(400).json({ message });
+const notFound = (res, message) => res.status(404).json({ message });
+const toObjectId = (value) => new mongoose.Types.ObjectId(toObjectIdString(value));
 
 const getPagination = (page, limit) => {
-  const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
-  const safeLimit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 20));
+  const safePage = Math.max(1, Number.parseInt(page, 10) || DEFAULT_PAGE);
+  const safeLimit = Math.min(MAX_LIMIT, Math.max(1, Number.parseInt(limit, 10) || DEFAULT_LIMIT));
 
   return { safePage, safeLimit };
 };
