@@ -214,9 +214,12 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
   if (!isValidObjectId(threadId) || !isValidObjectId(normalizedUserId)) {
     return badRequest(res, "Invalid thread id or user id");
   }
-  const thread = await ensureThreadExists(threadId);
+  const thread = await ensureThreadWithParticipants(threadId);
   if (!thread) {
-    return res.status(404).json({ message: "Thread not found" });
+    return notFound(res, "Thread not found");
+  }
+  if (!isParticipant(thread, normalizedUserId)) {
+    return res.status(403).json({ message: "You are not a participant in this thread" });
   }
   const unreadFilter = {
     thread: threadId,
