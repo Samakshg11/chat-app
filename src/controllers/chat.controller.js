@@ -17,6 +17,13 @@ const badRequest = (res, message) => res.status(400).json({ message });
 const notFound = (res, message) => res.status(404).json({ message });
 const forbidden = (res, message) => res.status(403).json({ message });
 const toObjectId = (value) => new mongoose.Types.ObjectId(toObjectIdString(value));
+const parseSortOrder = (value) => {
+  const normalizedOrder = typeof value === "string" ? value.toLowerCase() : "desc";
+  if (normalizedOrder !== "asc" && normalizedOrder !== "desc") {
+    return null;
+  }
+  return normalizedOrder;
+};
 
 const getPagination = (page, limit) => {
   const safePage = Math.max(1, Number.parseInt(page, 10) || DEFAULT_PAGE);
@@ -193,9 +200,9 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
   const { safePage, safeLimit } = getPagination(page, limit);
   const skip = (safePage - 1) * safeLimit;
-  const normalizedOrder = typeof order === "string" ? order.toLowerCase() : "desc";
+  const normalizedOrder = parseSortOrder(order);
 
-  if (normalizedOrder !== "asc" && normalizedOrder !== "desc") {
+  if (!normalizedOrder) {
     return badRequest(res, "Invalid order. Use 'asc' or 'desc'");
   }
   const sortDirection = normalizedOrder === "asc" ? 1 : -1;
