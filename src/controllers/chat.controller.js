@@ -24,6 +24,16 @@ const parseSortOrder = (value) => {
   }
   return normalizedOrder;
 };
+const parseBoolean = (value) => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  return ["true", "1", "yes"].includes(value.toLowerCase());
+};
 
 const getPagination = (page, limit) => {
   const safePage = Math.max(1, Number.parseInt(page, 10) || DEFAULT_PAGE);
@@ -185,7 +195,7 @@ exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
   const { page = 1, limit = 20, order = "desc", userId, markAsRead = "false" } = req.query;
   const normalizedUserId = userId ? toObjectIdString(userId) : null;
-  const shouldMarkAsRead = markAsRead === "true";
+  const shouldMarkAsRead = parseBoolean(markAsRead);
 
   if (!isValidObjectId(threadId) || (normalizedUserId && !isValidObjectId(normalizedUserId))) {
     return badRequest(res, "Invalid thread id or user id");
