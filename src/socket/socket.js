@@ -6,7 +6,10 @@ const onlineUsers = new Map();
 const socketToUser = new Map();
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const emitPresenceUpdate = () => {
-  io.emit("presence:update", { onlineCount: onlineUsers.size });
+  io.emit("presence:update", {
+    onlineCount: onlineUsers.size,
+    onlineUserIds: Array.from(onlineUsers.keys()),
+  });
 };
 
 function initSocket(server) {
