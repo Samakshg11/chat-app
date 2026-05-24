@@ -175,7 +175,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     {
       $set: {
         lastMessage: normalizedMessage,
-        lastMessageTime: new Date(),
+        lastMessageTime: chat.createdAt,
       },
     }
   );
