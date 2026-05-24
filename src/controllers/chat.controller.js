@@ -8,6 +8,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 const MAX_MESSAGE_LENGTH = 4000;
+const NOT_PARTICIPANT_ERROR = "You are not a participant in this thread";
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const toObjectIdString = (value) => String(value);
@@ -206,7 +207,7 @@ exports.getMessages = asyncHandler(async (req, res) => {
     return notFound(res, "Thread not found");
   }
   if (normalizedUserId && !isParticipant(thread, normalizedUserId)) {
-    return forbidden(res, "You are not a participant in this thread");
+    return forbidden(res, NOT_PARTICIPANT_ERROR);
   }
 
   const { safePage, safeLimit } = getPagination(page, limit);
@@ -261,7 +262,7 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
     return notFound(res, "Thread not found");
   }
   if (!isParticipant(thread, normalizedUserId)) {
-    return forbidden(res, "You are not a participant in this thread");
+    return forbidden(res, NOT_PARTICIPANT_ERROR);
   }
   const unreadFilter = {
     thread: threadId,
