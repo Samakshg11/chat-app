@@ -5,6 +5,9 @@ let io;
 const onlineUsers = new Map(); 
 const socketToUser = new Map();
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+const emitPresenceUpdate = () => {
+  io.emit("presence:update", { onlineCount: onlineUsers.size });
+};
 
 function initSocket(server) {
 
@@ -23,7 +26,7 @@ function initSocket(server) {
 
       onlineUsers.set(normalizedUserId, socket.id); // user ko map me add kra
       socketToUser.set(socket.id, normalizedUserId);
-      io.emit("presence:update", { onlineCount: onlineUsers.size });
+      emitPresenceUpdate();
     });
 
     socket.on("leave", () => {
@@ -34,7 +37,7 @@ function initSocket(server) {
 
       onlineUsers.delete(userId);
       socketToUser.delete(socket.id);
-      io.emit("presence:update", { onlineCount: onlineUsers.size });
+      emitPresenceUpdate();
     });
 
     socket.on("disconnect", () => {
@@ -42,7 +45,7 @@ function initSocket(server) {
       if (userId) {
         onlineUsers.delete(userId); // disconnect pe remove
         socketToUser.delete(socket.id);
-        io.emit("presence:update", { onlineCount: onlineUsers.size });
+        emitPresenceUpdate();
       }
       console.log("User Disconnected"); 
     });
