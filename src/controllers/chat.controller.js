@@ -32,10 +32,6 @@ const buildPagination = ({ page, limit, count, total }) => ({
 });
 
 const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
-const ensureThreadExists = async (threadId) => {
-  const thread = await Thread.findById(threadId).select("_id").lean();
-  return thread;
-};
 const ensureThreadWithParticipants = async (threadId) => {
   const thread = await Thread.findById(threadId).select("_id participants").lean();
   return thread;
