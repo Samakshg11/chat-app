@@ -15,6 +15,7 @@ const normalizeMessage = (value) =>
   (typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "");
 const badRequest = (res, message) => res.status(400).json({ message });
 const notFound = (res, message) => res.status(404).json({ message });
+const forbidden = (res, message) => res.status(403).json({ message });
 const toObjectId = (value) => new mongoose.Types.ObjectId(toObjectIdString(value));
 
 const getPagination = (page, limit) => {
@@ -187,7 +188,7 @@ exports.getMessages = asyncHandler(async (req, res) => {
     return notFound(res, "Thread not found");
   }
   if (normalizedUserId && !isParticipant(thread, normalizedUserId)) {
-    return res.status(403).json({ message: "You are not a participant in this thread" });
+    return forbidden(res, "You are not a participant in this thread");
   }
 
   const { safePage, safeLimit } = getPagination(page, limit);
@@ -242,7 +243,7 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
     return notFound(res, "Thread not found");
   }
   if (!isParticipant(thread, normalizedUserId)) {
-    return res.status(403).json({ message: "You are not a participant in this thread" });
+    return forbidden(res, "You are not a participant in this thread");
   }
   const unreadFilter = {
     thread: threadId,
