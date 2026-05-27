@@ -2,6 +2,7 @@ const Chat = require("../models/chat");
 const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { getIO, onlineUsers } = require("../socket/socket");
+const { badRequest, forbidden, notFound } = require("../utils/httpResponses");
 const {
   getPagination,
   isValidObjectId,
@@ -16,9 +17,6 @@ const NOT_PARTICIPANT_ERROR = "You are not a participant in this thread";
 
 const normalizeMessage = (value) =>
   (typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "");
-const badRequest = (res, message) => res.status(400).json({ message });
-const notFound = (res, message) => res.status(404).json({ message });
-const forbidden = (res, message) => res.status(403).json({ message });
 const buildPagination = ({ page, limit, count, total }) => ({
   page,
   limit,
