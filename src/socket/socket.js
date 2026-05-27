@@ -2,9 +2,36 @@ const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
 let io;
-const onlineUsers = new Map(); 
+const onlineUsers = new Map();
 const socketToUser = new Map();
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+
+const getUserSocketIds = (userId) => Array.from(onlineUsers.get(String(userId)) || []);
+const addUserSocket = (userId, socketId) => {
+  const normalizedUserId = String(userId);
+  const sockets = onlineUsers.get(normalizedUserId) || new Set();
+  sockets.add(socketId);
+  onlineUsers.set(normalizedUserId, sockets);
+  socketToUser.set(socketId, normalizedUserId);
+};
+const removeUserSocket = (socketId) => {
+  const userId = socketToUser.get(socketId);
+  if (!userId) {
+    return;
+  }
+
+  const sockets = onlineUsers.get(userId);
+  if (sockets) {
+    sockets.delete(socketId);
+    if (sockets.size === 0) {
+      onlineUsers.delete(userId);
+    } else {
+      onlineUsers.set(userId, sockets);
+    }
+  }
+
+  socketToUser.delete(socketId);
+};
 const emitPresenceUpdate = () => {
   io.emit("presence:update", {
     onlineCount: onlineUsers.size,
@@ -27,27 +54,18 @@ function initSocket(server) {
         return;
       }
 
-      onlineUsers.set(normalizedUserId, socket.id); // user ko map me add kra
-      socketToUser.set(socket.id, normalizedUserId);
+      addUserSocket(normalizedUserId, socket.id);
       emitPresenceUpdate();
     });
 
     socket.on("leave", () => {
-      const userId = socketToUser.get(socket.id);
-      if (!userId) {
-        return;
-      }
-
-      onlineUsers.delete(userId);
-      socketToUser.delete(socket.id);
+      removeUserSocket(socket.id);
       emitPresenceUpdate();
     });
 
     socket.on("disconnect", () => {
-      const userId = socketToUser.get(socket.id);
-      if (userId) {
-        onlineUsers.delete(userId); // disconnect pe remove
-        socketToUser.delete(socket.id);
+      if (socketToUser.has(socket.id)) {
+        removeUserSocket(socket.id);
         emitPresenceUpdate();
       }
       console.log("User Disconnected"); 
@@ -60,6 +78,12 @@ function getIO() {
   return io;
 }
 
+function emitToUser(userId, eventName, payload) {
+  const userSocketIds = getUserSocketIds(userId);
+  userSocketIds.forEach((socketId) => io.to(socketId).emit(eventName, payload));
+}
+
 module.exports = initSocket;
 module.exports.getIO = getIO; 
 module.exports.onlineUsers = onlineUsers; 
+module.exports.emitToUser = emitToUser;

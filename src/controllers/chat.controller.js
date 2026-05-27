@@ -1,7 +1,7 @@
 const Chat = require("../models/chat");
 const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
-const { getIO, onlineUsers } = require("../socket/socket");
+const { emitToUser } = require("../socket/socket");
 const { badRequest, forbidden, notFound } = require("../utils/httpResponses");
 const {
   getPagination,
@@ -164,11 +164,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   );
 
   // realtime emit
-  const receiverSocket = onlineUsers.get(normalizedReceiver);
-
-  if (receiverSocket) {
-    getIO().to(receiverSocket).emit("newMessage", chat);
-  }
+  emitToUser(normalizedReceiver, "newMessage", chat);
 
   res.status(201).json(chat);
 });
@@ -266,13 +262,10 @@ exports.markThreadAsRead = asyncHandler(async (req, res) => {
   );
   if ((result.modifiedCount || 0) > 0) {
     senderIds.forEach((senderId) => {
-      const senderSocket = onlineUsers.get(String(senderId));
-      if (senderSocket) {
-        getIO().to(senderSocket).emit("threadRead", {
-          threadId,
-          readBy: normalizedUserId,
-        });
-      }
+      emitToUser(String(senderId), "threadRead", {
+        threadId,
+        readBy: normalizedUserId,
+      });
     });
   }
 
