@@ -5,6 +5,15 @@ let io;
 const onlineUsers = new Map();
 const socketToUser = new Map();
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+const resolveJoinUserId = (payload) => {
+  if (typeof payload === "string") {
+    return payload;
+  }
+  if (payload && typeof payload === "object") {
+    return payload.userId;
+  }
+  return null;
+};
 
 const getUserSocketIds = (userId) => Array.from(onlineUsers.get(String(userId)) || []);
 const addUserSocket = (userId, socketId) => {
@@ -32,11 +41,12 @@ const removeUserSocket = (socketId) => {
 
   socketToUser.delete(socketId);
 };
+const buildPresencePayload = () => ({
+  onlineCount: onlineUsers.size,
+  onlineUserIds: Array.from(onlineUsers.keys()),
+});
 const emitPresenceUpdate = () => {
-  io.emit("presence:update", {
-    onlineCount: onlineUsers.size,
-    onlineUserIds: Array.from(onlineUsers.keys()),
-  });
+  io.emit("presence:update", buildPresencePayload());
 };
 
 function initSocket(server) {
@@ -47,10 +57,13 @@ function initSocket(server) {
 
   io.on("connection", (socket) => {
     console.log("User Connected"); // connect hua
+    socket.emit("presence:snapshot", buildPresencePayload());
 
-    socket.on("join", (userId) => {
-      const normalizedUserId = String(userId);
+    socket.on("join", (payload) => {
+      const joinedUserId = resolveJoinUserId(payload);
+      const normalizedUserId = joinedUserId ? String(joinedUserId) : null;
       if (!isValidObjectId(normalizedUserId)) {
+        socket.emit("join:error", { message: "Invalid user id" });
         return;
       }
 
