@@ -4,6 +4,7 @@ const express = require("express"); // express import
 const http = require("http"); // http server
 const cors = require("cors"); // cors allow
 const morgan = require("morgan"); // logger
+const mongoose = require("mongoose");
 
 const connectDB = require("./src/config/db"); // db connect
 const chatRoutes = require("./src/routes/chat.routes"); // chat routes
@@ -26,6 +27,13 @@ app.use(optionalAuth);
 app.use("/api/chat", chatRoutes); // chat api
 
 // health check
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+app.get("/ready", (req, res) => {
+  const isConnected = mongoose.connection.readyState === 1;
+  res.status(isConnected ? 200 : 503).json({ status: isConnected ? "ready" : "not_ready" });
+});
 app.use(express.static("src/public"));
 
 
@@ -35,7 +43,15 @@ app.use(errorMiddleware); // error handle
 // db + server start
 connectDB().then(() => {
   const PORT = process.env.PORT || 3000; // port set
-  server.listen(PORT, () =>
+  const runningServer = server.listen(PORT, () =>
     console.log(`Server running on ${PORT}`) // server start
   );
+
+  const shutdown = (signal) => {
+    console.log(`Received ${signal}, shutting down gracefully`);
+    runningServer.close(() => process.exit(0));
+  };
+
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 });
