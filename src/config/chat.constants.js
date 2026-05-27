@@ -1,0 +1,6 @@
+module.exports = {
+  DEFAULT_LIMIT: 20,
+  DEFAULT_PAGE: 1,
+  MAX_LIMIT: 100,
+  MAX_MESSAGE_LENGTH: 4000,
+};

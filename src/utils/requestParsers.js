@@ -1,8 +1,5 @@
 const mongoose = require("mongoose");
-
-const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
+const { DEFAULT_LIMIT, DEFAULT_PAGE, MAX_LIMIT } = require("../config/chat.constants");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const toObjectIdString = (value) => String(value);

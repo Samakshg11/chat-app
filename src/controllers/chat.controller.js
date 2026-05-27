@@ -2,6 +2,7 @@ const Chat = require("../models/chat");
 const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { emitToUser } = require("../socket/socket");
+const { MAX_MESSAGE_LENGTH } = require("../config/chat.constants");
 const { badRequest, forbidden, notFound } = require("../utils/httpResponses");
 const {
   getPagination,
@@ -12,7 +13,6 @@ const {
   toObjectIdString,
 } = require("../utils/requestParsers");
 
-const MAX_MESSAGE_LENGTH = 4000;
 const NOT_PARTICIPANT_ERROR = "You are not a participant in this thread";
 
 const normalizeMessage = (value) =>

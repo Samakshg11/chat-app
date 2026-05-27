@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { MAX_MESSAGE_LENGTH } = require("../config/chat.constants");
 
 const chatSchema = new mongoose.Schema(
   {
@@ -18,7 +19,7 @@ const chatSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: 4000,
+      maxlength: MAX_MESSAGE_LENGTH,
     },
     thread: {
       type: mongoose.Schema.Types.ObjectId,
