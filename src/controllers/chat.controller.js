@@ -1,47 +1,24 @@
-const mongoose = require("mongoose");
 const Chat = require("../models/chat");
 const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { getIO, onlineUsers } = require("../socket/socket");
+const {
+  getPagination,
+  isValidObjectId,
+  parseBoolean,
+  parseSortOrder,
+  toObjectId,
+  toObjectIdString,
+} = require("../utils/requestParsers");
 
-const DEFAULT_PAGE = 1;
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
 const MAX_MESSAGE_LENGTH = 4000;
 const NOT_PARTICIPANT_ERROR = "You are not a participant in this thread";
 
-const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
-const toObjectIdString = (value) => String(value);
 const normalizeMessage = (value) =>
   (typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "");
 const badRequest = (res, message) => res.status(400).json({ message });
 const notFound = (res, message) => res.status(404).json({ message });
 const forbidden = (res, message) => res.status(403).json({ message });
-const toObjectId = (value) => new mongoose.Types.ObjectId(toObjectIdString(value));
-const parseSortOrder = (value) => {
-  const normalizedOrder = typeof value === "string" ? value.toLowerCase() : "desc";
-  if (normalizedOrder !== "asc" && normalizedOrder !== "desc") {
-    return null;
-  }
-  return normalizedOrder;
-};
-const parseBoolean = (value) => {
-  if (typeof value === "boolean") {
-    return value;
-  }
-  if (typeof value !== "string") {
-    return false;
-  }
-
-  return ["true", "1", "yes"].includes(value.toLowerCase());
-};
-
-const getPagination = (page, limit) => {
-  const safePage = Math.max(1, Number.parseInt(page, 10) || DEFAULT_PAGE);
-  const safeLimit = Math.min(MAX_LIMIT, Math.max(1, Number.parseInt(limit, 10) || DEFAULT_LIMIT));
-
-  return { safePage, safeLimit };
-};
 const buildPagination = ({ page, limit, count, total }) => ({
   page,
   limit,
