@@ -27,6 +27,7 @@ const buildPagination = ({ page, limit, count, total }) => ({
 });
 
 const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
+const resolveActorId = (req, fallbackUserId) => req.auth?.userId || fallbackUserId || null;
 const ensureThreadWithParticipants = async (threadId) => {
   const thread = await Thread.findById(threadId).select("_id participants").lean();
   return thread;
@@ -35,7 +36,11 @@ const isParticipant = (thread, userId) =>
   Array.isArray(thread?.participants) && thread.participants.some((participantId) => String(participantId) === userId);
 
 exports.getThreads = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
+  const requestedUserId = req.params.userId;
+  const userId = resolveActorId(req, requestedUserId);
+  if (!userId) {
+    return badRequest(res, "Missing user id");
+  }
   const { page = 1, limit = 20 } = req.query;
   const normalizedUserId = toObjectIdString(userId);
 
@@ -104,11 +109,13 @@ exports.getThreads = asyncHandler(async (req, res) => {
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
-  const normalizedSender = toObjectIdString(sender);
-  const normalizedReceiver = toObjectIdString(receiver);
+  const actorUserId = resolveActorId(req, null);
+  const rawSender = actorUserId || sender;
+  const normalizedSender = rawSender ? toObjectIdString(rawSender) : null;
+  const normalizedReceiver = receiver ? toObjectIdString(receiver) : null;
   const normalizedMessage = normalizeMessage(message);
 
-  if (!sender || !receiver || !normalizedMessage) {
+  if (!normalizedSender || !normalizedReceiver || !normalizedMessage) {
     return badRequest(res, "Missing fields");
   }
   if (normalizedMessage.length > MAX_MESSAGE_LENGTH) {
@@ -169,8 +176,9 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 // get messages
 exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
-  const { page = 1, limit = 20, order = "desc", userId, markAsRead = "false" } = req.query;
-  const normalizedUserId = userId ? toObjectIdString(userId) : null;
+  const { page = 1, limit = 20, order = "desc", userId: queryUserId, markAsRead = "false" } = req.query;
+  const actorUserId = resolveActorId(req, queryUserId);
+  const normalizedUserId = actorUserId ? toObjectIdString(actorUserId) : null;
   const shouldMarkAsRead = parseBoolean(markAsRead);
 
   if (!isValidObjectId(threadId) || (normalizedUserId && !isValidObjectId(normalizedUserId))) {
@@ -226,7 +234,11 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
 exports.markThreadAsRead = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
-  const { userId } = req.body;
+  const { userId: bodyUserId } = req.body;
+  const userId = resolveActorId(req, bodyUserId);
+  if (!userId) {
+    return badRequest(res, "Missing user id");
+  }
   const normalizedUserId = toObjectIdString(userId);
 
   if (!isValidObjectId(threadId) || !isValidObjectId(normalizedUserId)) {
