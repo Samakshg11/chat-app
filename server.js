@@ -8,6 +8,7 @@ const morgan = require("morgan"); // logger
 const connectDB = require("./src/config/db"); // db connect
 const chatRoutes = require("./src/routes/chat.routes"); // chat routes
 const errorMiddleware = require("./src/middleware/error.middleware");
+const optionalAuth = require("./src/middleware/optionalAuth.middleware");
 const initSocket = require("./src/socket/socket"); // socket setup
 
 const app = express(); // app create
@@ -19,6 +20,7 @@ initSocket(server); // socket start
 app.use(cors()); // cors enable
 app.use(express.json({ limit: "5mb" })); // json allow
 app.use(morgan("dev")); // log show
+app.use(optionalAuth);
 
 // routes
 app.use("/api/chat", chatRoutes); // chat api
