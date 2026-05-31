@@ -16,6 +16,7 @@ const resolveJoinUserId = (payload) => {
 };
 
 const getUserSocketIds = (userId) => Array.from(onlineUsers.get(String(userId)) || []);
+const isUserOnline = (userId) => getUserSocketIds(userId).length > 0;
 const addUserSocket = (userId, socketId) => {
   const normalizedUserId = String(userId);
   const sockets = onlineUsers.get(normalizedUserId) || new Set();
@@ -106,3 +107,4 @@ module.exports = initSocket;
 module.exports.getIO = getIO; 
 module.exports.onlineUsers = onlineUsers; 
 module.exports.emitToUser = emitToUser;
+module.exports.isUserOnline = isUserOnline;
