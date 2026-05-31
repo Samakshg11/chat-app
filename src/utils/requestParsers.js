@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const { DEFAULT_LIMIT, DEFAULT_PAGE, MAX_LIMIT } = require("../config/chat.constants");
 
-const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
-const toObjectIdString = (value) => String(value);
+const normalizeString = (value) => (typeof value === "string" ? value.trim() : String(value));
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(normalizeString(value));
+const toObjectIdString = (value) => normalizeString(value);
 const toObjectId = (value) => new mongoose.Types.ObjectId(toObjectIdString(value));
 
 const parseSortOrder = (value) => {
-  const normalizedOrder = typeof value === "string" ? value.toLowerCase() : "desc";
+  const normalizedOrder = typeof value === "string" ? value.trim().toLowerCase() : "desc";
   if (normalizedOrder !== "asc" && normalizedOrder !== "desc") {
     return null;
   }
@@ -21,7 +22,11 @@ const parseBoolean = (value) => {
     return false;
   }
 
-  return ["true", "1", "yes"].includes(value.toLowerCase());
+  const normalizedValue = value.trim().toLowerCase();
+  if (["false", "0", "no"].includes(normalizedValue)) {
+    return false;
+  }
+  return ["true", "1", "yes"].includes(normalizedValue);
 };
 
 const getPagination = (page, limit) => {
