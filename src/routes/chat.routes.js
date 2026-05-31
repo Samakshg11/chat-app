@@ -5,6 +5,7 @@ const chatController = require("../controllers/chat.controller");
 router.post("/send", chatController.sendMessage);
 router.get("/threads/me", chatController.getThreads);
 router.get("/threads/:userId", chatController.getThreads);
+router.patch("/thread/:threadId/read/me", chatController.markThreadAsRead);
 router.patch("/thread/:threadId/read", chatController.markThreadAsRead);
 
 router.get("/:threadId", chatController.getMessages);
