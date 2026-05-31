@@ -46,6 +46,9 @@ const buildPresencePayload = () => ({
   onlineUserIds: Array.from(onlineUsers.keys()),
 });
 const emitPresenceUpdate = () => {
+  if (!io) {
+    return;
+  }
   io.emit("presence:update", buildPresencePayload());
 };
 
@@ -92,6 +95,9 @@ function getIO() {
 }
 
 function emitToUser(userId, eventName, payload) {
+  if (!io || !userId) {
+    return;
+  }
   const userSocketIds = getUserSocketIds(userId);
   userSocketIds.forEach((socketId) => io.to(socketId).emit(eventName, payload));
 }
