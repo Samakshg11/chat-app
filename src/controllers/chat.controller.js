@@ -22,7 +22,7 @@ const buildPagination = ({ page, limit, count, total }) => ({
   limit,
   count,
   total,
-  totalPages: Math.ceil(total / limit),
+  totalPages: Math.max(1, Math.ceil(total / limit)),
   hasMore: (page - 1) * limit + count < total,
 });
 
