@@ -60,7 +60,7 @@ function initSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    console.log("User Connected"); // connect hua
+    console.log("User Connected:", socket.id); // connect hua
     socket.emit("presence:snapshot", buildPresencePayload());
 
     socket.on("join", (payload) => {
@@ -85,7 +85,7 @@ function initSocket(server) {
         removeUserSocket(socket.id);
         emitPresenceUpdate();
       }
-      console.log("User Disconnected"); 
+      console.log("User Disconnected:", socket.id); 
     });
   });
 }
