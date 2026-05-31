@@ -1,7 +1,7 @@
 const Chat = require("../models/chat");
 const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
-const { emitToUser } = require("../socket/socket");
+const { emitToUser, isUserOnline } = require("../socket/socket");
 const { MAX_MESSAGE_LENGTH } = require("../config/chat.constants");
 const { badRequest, forbidden, notFound } = require("../utils/httpResponses");
 const {
@@ -166,7 +166,10 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   // realtime emit
   emitToUser(normalizedReceiver, "newMessage", chat);
 
-  res.status(201).json(chat);
+  res.status(201).json({
+    ...chat.toObject(),
+    receiverOnline: isUserOnline(normalizedReceiver),
+  });
 });
 
 // get messages
