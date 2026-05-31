@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "check:syntax": "node --check server.js && node --check src/app.js && node --check src/controllers/chat.controller.js && node --check src/socket/socket.js"
   },
   "keywords": [],
   "author": "",
