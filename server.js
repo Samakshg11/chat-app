@@ -30,6 +30,9 @@ app.use("/api/chat", chatRoutes); // chat api
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
+app.get("/live", (req, res) => {
+  res.status(200).json({ status: "alive" });
+});
 app.get("/ready", (req, res) => {
   const isConnected = mongoose.connection.readyState === 1;
   res.status(isConnected ? 200 : 503).json({ status: isConnected ? "ready" : "not_ready" });
