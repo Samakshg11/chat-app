@@ -46,6 +46,7 @@ const buildPresencePayload = () => ({
   onlineCount: onlineUsers.size,
   onlineUserIds: Array.from(onlineUsers.keys()),
 });
+const getOnlineUserIds = () => Array.from(onlineUsers.keys());
 const emitPresenceUpdate = () => {
   if (!io) {
     return;
@@ -109,3 +110,4 @@ module.exports.getIO = getIO;
 module.exports.onlineUsers = onlineUsers; 
 module.exports.emitToUser = emitToUser;
 module.exports.isUserOnline = isUserOnline;
+module.exports.getOnlineUserIds = getOnlineUserIds;
