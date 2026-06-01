@@ -3,7 +3,7 @@ const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { emitToUser, isUserOnline } = require("../socket/socket");
 const { MAX_MESSAGE_LENGTH } = require("../config/chat.constants");
-const { badRequest, forbidden, notFound } = require("../utils/httpResponses");
+const { badRequest, forbidden, notFound, unauthorized } = require("../utils/httpResponses");
 const {
   getPagination,
   isValidObjectId,
@@ -182,6 +182,9 @@ exports.getMessages = asyncHandler(async (req, res) => {
 
   if (!isValidObjectId(threadId) || (normalizedUserId && !isValidObjectId(normalizedUserId))) {
     return badRequest(res, "Invalid thread id or user id");
+  }
+  if (shouldMarkAsRead && !normalizedUserId) {
+    return unauthorized(res, "Authentication required to mark messages as read");
   }
 
   const thread = await ensureThreadWithParticipants(threadId);
