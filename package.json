@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "check:syntax": "node --check server.js && node --check src/app.js && node --check src/controllers/chat.controller.js && node --check src/socket/socket.js"
+    "check:syntax": "node --check server.js && node --check src/app.js && node --check src/controllers/chat.controller.js && node --check src/socket/socket.js && node --check src/middleware/optionalAuth.middleware.js && node --check src/utils/requestParsers.js && node --check src/config/db.js"
   },
   "keywords": [],
   "author": "",
