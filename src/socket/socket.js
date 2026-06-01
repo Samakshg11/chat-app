@@ -54,9 +54,10 @@ const emitPresenceUpdate = () => {
 };
 
 function initSocket(server) {
+  const corsOrigin = process.env.SOCKET_CORS_ORIGIN || "*";
 
   io = new Server(server, {
-    cors: { origin: "*" } // cors allow kr diya
+    cors: { origin: corsOrigin } // cors allow kr diya
   });
 
   io.on("connection", (socket) => {
