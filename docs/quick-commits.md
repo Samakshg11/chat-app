@@ -27,3 +27,11 @@
 - `newMessage`: delivered to all active receiver sockets.
 - `threadRead`: delivered to all active sender sockets only when unread messages were actually transitioned to read.
 - `presence:update`: broadcast with `{ onlineCount, onlineUserIds }` on join/leave/disconnect.
+
+## Commit message guidelines
+
+- Use imperative mood: "Add", "Fix", "Update".
+- Keep messages concise and focused on one change.
+- Reference files or issues when helpful.
+
+Example: `Add README with quick start` or `Fix error formatting in error.middleware.js`.
