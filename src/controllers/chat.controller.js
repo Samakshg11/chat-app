@@ -35,6 +35,10 @@ const ensureThreadWithParticipants = async (threadId) => {
 const isParticipant = (thread, userId) =>
   Array.isArray(thread?.participants) && thread.participants.some((participantId) => String(participantId) === userId);
 
+/**
+ * GET /api/chat/threads/:userId?
+ * Returns paginated thread list for a user. If authenticated, token identity is used when :userId is omitted.
+ */
 exports.getThreads = asyncHandler(async (req, res) => {
   const requestedUserId = req.params.userId;
   const userId = resolveActorId(req, requestedUserId);
@@ -106,6 +110,11 @@ exports.getThreads = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * POST /api/chat/send
+ * Creates (or finds) a thread and stores a message. Expects { sender, receiver, message }.
+ * If authenticated, `sender` is inferred from the token.
+ */
 // send message
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { sender, receiver, message } = req.body;
@@ -172,6 +181,10 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * GET /api/chat/:threadId
+ * Retrieves messages for a thread with pagination and optional `markAsRead`.
+ */
 // get messages
 exports.getMessages = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
@@ -234,6 +247,10 @@ exports.getMessages = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * PATCH /api/chat/thread/:threadId/read
+ * Marks messages in a thread as read for a provided user (or authenticated user).
+ */
 exports.markThreadAsRead = asyncHandler(async (req, res) => {
   const { threadId } = req.params;
   const { userId: bodyUserId } = req.body;
