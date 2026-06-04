@@ -1,6 +1,15 @@
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
+/**
+ * Socket helpers and initialization.
+ *
+ * Notes for clients: prefer enabling automatic reconnect with exponential
+ * backoff (e.g. `reconnection: true`, `reconnectionAttempts`, `reconnectionDelay`).
+ * Server-side options such as `pingInterval` and `pingTimeout` can be tuned
+ * via the `Server` constructor if needed for large deployments.
+ */
+
 let io;
 const onlineUsers = new Map();
 const socketToUser = new Map();
