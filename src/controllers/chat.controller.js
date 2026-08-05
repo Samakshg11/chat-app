@@ -3,6 +3,7 @@ const Thread = require("../models/thread");
 const asyncHandler = require("../utils/asyncHandler");
 const { emitToUser, isUserOnline } = require("../socket/socket");
 const { MAX_MESSAGE_LENGTH } = require("../config/chat.constants");
+const { normalizeMessage, validateMessage } = require("../utils/messageValidator");
 const { badRequest, forbidden, notFound, unauthorized } = require("../utils/httpResponses");
 const {
   getPagination,
@@ -15,8 +16,7 @@ const {
 
 const NOT_PARTICIPANT_ERROR = "You are not a participant in this thread";
 
-const normalizeMessage = (value) =>
-  (typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "");
+// message normalization/validation moved to src/utils/messageValidator.js
 const buildPagination = ({ page, limit, count, total }) => ({
   page,
   limit,
@@ -123,12 +123,12 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   const normalizedSender = rawSender ? toObjectIdString(rawSender) : null;
   const normalizedReceiver = receiver ? toObjectIdString(receiver) : null;
   const normalizedMessage = normalizeMessage(message);
-
-  if (!normalizedSender || !normalizedReceiver || !normalizedMessage) {
+  if (!normalizedSender || !normalizedReceiver) {
     return badRequest(res, "Missing fields");
   }
-  if (normalizedMessage.length > MAX_MESSAGE_LENGTH) {
-    return badRequest(res, `Message exceeds ${MAX_MESSAGE_LENGTH} characters`);
+  const validationError = validateMessage(normalizedMessage, MAX_MESSAGE_LENGTH);
+  if (validationError) {
+    return badRequest(res, validationError);
   }
 
   if (!isValidObjectId(normalizedSender) || !isValidObjectId(normalizedReceiver)) {
