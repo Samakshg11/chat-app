@@ -17,3 +17,11 @@ Where to look
 - Controllers: `src/controllers/`
 
 This repository contains minimal scaffolding for local development.
+
+Development
+
+- Run syntax checks: `npm run check:syntax`
+- Run in dev mode with auto-reload: `npm run dev`
+- Environment variables are loaded from `.env` at startup. Ensure `MONGO_URI` is set before running.
+
+If you'd like help setting up an automated CI workflow, open an issue describing your CI provider.
