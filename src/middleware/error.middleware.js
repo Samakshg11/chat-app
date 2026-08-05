@@ -5,6 +5,8 @@ module.exports = (err, req, res, next) => {
   const payload = {
     message: isProduction ? "Server Error" : err.message || "Server Error",
     code: err.code || undefined,
+    method: req.method,
+    path: req.originalUrl || req.url,
     timestamp: new Date().toISOString(),
   };
 
