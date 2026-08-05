@@ -1,5 +1,7 @@
+const logger = require("../utils/logger");
+
 module.exports = (err, req, res, next) => {
-  console.error(err);
+  logger.error(err);
   const isProduction = process.env.NODE_ENV === "production";
 
   const payload = {
