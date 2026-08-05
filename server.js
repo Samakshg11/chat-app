@@ -1,4 +1,5 @@
 require("dotenv").config(); // env file load
+const ensureEnv = require("./src/utils/ensureEnv");
 
 const express = require("express"); // express import
 const http = require("http"); // http server
@@ -43,7 +44,8 @@ app.use(express.static("src/public"));
 // error middleware
 app.use(errorMiddleware); // error handle
 
-// db + server start
+// validate env and start db + server
+ensureEnv();
 connectDB().then(() => {
   const PORT = process.env.PORT || 3000; // port set
   const runningServer = server.listen(PORT, () =>
