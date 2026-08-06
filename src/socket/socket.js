@@ -114,6 +114,14 @@ function emitToUser(userId, eventName, payload) {
   userSocketIds.forEach((socketId) => io.to(socketId).emit(eventName, payload));
 }
 
+/**
+ * Emit an event to all sockets for a given user id.
+ * Safe to call when the socket server is not initialized.
+ * @param {string} userId
+ * @param {string} eventName
+ * @param {any} payload
+ */
+
 module.exports = initSocket;
 module.exports.getIO = getIO; 
 module.exports.onlineUsers = onlineUsers; 
