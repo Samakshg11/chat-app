@@ -9,3 +9,6 @@
 - fix: include request method and path in error responses
 - chore: add logger utility and use in error middleware
 - chore: validate required env vars before startup
+ - docs: add API overview to README and commit message guidelines
+ - chore: add .gitignore and ESLint config
+ - refactor: minor id validation helper in chat controller
