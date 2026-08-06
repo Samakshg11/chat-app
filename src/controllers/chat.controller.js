@@ -28,6 +28,10 @@ const buildPagination = ({ page, limit, count, total }) => ({
 
 const buildParticipantsKey = (sender, receiver) => [String(sender), String(receiver)].sort().join(":");
 const resolveActorId = (req, fallbackUserId) => req.auth?.userId || fallbackUserId || null;
+const normalizeAndValidateId = (id) => {
+  const normalized = toObjectIdString(id);
+  return isValidObjectId(normalized) ? normalized : null;
+};
 const ensureThreadWithParticipants = async (threadId) => {
   const thread = await Thread.findById(threadId).select("_id participants").lean();
   return thread;
