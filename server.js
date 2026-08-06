@@ -49,7 +49,7 @@ ensureEnv();
 connectDB().then(() => {
   const PORT = process.env.PORT || 3000; // port set
   const runningServer = server.listen(PORT, () =>
-    console.log(`Server running on ${PORT}`) // server start
+    console.log(`Server running on ${PORT} (env=${process.env.NODE_ENV || 'development'})`) // server start
   );
 
   const shutdown = (signal) => {
