@@ -8,6 +8,17 @@ Getting started
 - Start in development: `npm run dev`
 - Start in production: `npm start`
 
+Quick API overview
+
+- `GET /api/chat/threads/:userId?` - list user's threads with pagination
+- `POST /api/chat/send` - send a message (body: `sender`, `receiver`, `message`)
+- `GET /api/chat/:threadId` - list messages in a thread with `page`, `limit`, `order`
+- `PATCH /api/chat/thread/:threadId/read` - mark messages as read for a user
+
+Health endpoints
+
+- `GET /health`, `GET /live`, `GET /ready` - basic service health checks
+
 Where to look
 
 - Server entry: `server.js`
