@@ -154,7 +154,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
         participantsKey,
       },
     },
-    { upsert: true, new: true }
+    { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
   // chat save
