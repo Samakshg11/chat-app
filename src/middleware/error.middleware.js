@@ -5,14 +5,17 @@ module.exports = (err, req, res, next) => {
   const isProduction = process.env.NODE_ENV === "production";
 
   const payload = {
-    message: isProduction ? "Server Error" : err.message || "Server Error",
-    code: err.code || undefined,
+    error: {
+      message: isProduction ? "Server Error" : err.message || "Server Error",
+      code: err.code || null,
+      status: err.status || 500,
+    },
     method: req.method,
     path: req.originalUrl || req.url,
     timestamp: new Date().toISOString(),
   };
 
-  if (!isProduction && err.stack) payload.stack = err.stack;
+  if (!isProduction && err.stack) payload.error.stack = err.stack;
 
-  res.status(err.status || 500).json(payload);
+  res.status(payload.error.status).json(payload);
 };
