@@ -20,18 +20,16 @@ const parseSortOrder = (value) => {
 };
 
 const parseBoolean = (value) => {
-  if (typeof value === "boolean") {
-    return value;
-  }
-  if (typeof value !== "string") {
-    return false;
-  }
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (value === null || value === undefined) return false;
+  if (typeof value !== "string") return false;
 
   const normalizedValue = value.trim().toLowerCase();
-  if (["false", "0", "no", "off"].includes(normalizedValue)) {
+  if (["false", "0", "no", "off", "null", "undefined", ""].includes(normalizedValue)) {
     return false;
   }
-  return ["true", "1", "yes", "on"].includes(normalizedValue);
+  return ["true", "1", "yes", "on"].includes(normalizedValue) || Boolean(normalizedValue);
 };
 
 const getPagination = (page, limit) => {
