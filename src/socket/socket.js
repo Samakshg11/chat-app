@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
+const logger = require("../utils/logger");
 
 /**
  * Socket helpers and initialization.
@@ -13,14 +14,11 @@ const mongoose = require("mongoose");
 let io;
 const onlineUsers = new Map();
 const socketToUser = new Map();
-const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+const normalizeString = (v) => (v === null || v === undefined ? "" : String(v).trim());
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(normalizeString(value));
 const resolveJoinUserId = (payload) => {
-  if (typeof payload === "string") {
-    return payload;
-  }
-  if (payload && typeof payload === "object") {
-    return payload.userId;
-  }
+  if (typeof payload === "string") return payload;
+  if (payload && typeof payload === "object") return normalizeString(payload.userId) || null;
   return null;
 };
 
@@ -71,7 +69,7 @@ function initSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    console.log("User Connected:", socket.id); // connect hua
+    logger.info("socket:connected", socket.id);
     socket.emit("presence:snapshot", buildPresencePayload());
 
     socket.on("join", (payload) => {
@@ -96,7 +94,7 @@ function initSocket(server) {
         removeUserSocket(socket.id);
         emitPresenceUpdate();
       }
-      console.log("User Disconnected:", socket.id); 
+      logger.info("socket:disconnected", socket.id);
     });
   });
 }
