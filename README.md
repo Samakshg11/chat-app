@@ -35,4 +35,8 @@ Development
 - Run in dev mode with auto-reload: `npm run dev`
 - Environment variables are loaded from `.env` at startup. Ensure `MONGO_URI` is set before running.
 
+Tests
+
+- Run basic project tests: `npm test` (executes scripts under `test/` which are lightweight node scripts)
+
 If you'd like help setting up an automated CI workflow, open an issue describing your CI provider.
