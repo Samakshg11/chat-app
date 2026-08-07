@@ -36,9 +36,9 @@ const chatSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-chatSchema.index({ thread: 1, createdAt: -1 });
-chatSchema.index({ thread: 1, receiver: 1, isRead: 1 });
-chatSchema.index({ receiver: 1, thread: 1, isRead: 1, createdAt: -1 });
-chatSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
+chatSchema.index({ thread: 1, createdAt: -1 }, { background: true });
+chatSchema.index({ thread: 1, receiver: 1, isRead: 1 }, { background: true });
+chatSchema.index({ receiver: 1, thread: 1, isRead: 1, createdAt: -1 }, { background: true });
+chatSchema.index({ sender: 1, receiver: 1, createdAt: -1 }, { background: true });
 
 module.exports = mongoose.model("Chat", chatSchema);
