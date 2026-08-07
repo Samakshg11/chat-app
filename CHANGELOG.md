@@ -12,3 +12,4 @@
  - docs: add API overview to README and commit message guidelines
  - chore: add .gitignore and ESLint config
  - refactor: minor id validation helper in chat controller
+ - test: add basic node tests and improve boolean parsing
