@@ -39,4 +39,10 @@ Tests
 
 - Run basic project tests: `npm test` (executes scripts under `test/` which are lightweight node scripts)
 
+- Run an individual test: `node test/messageValidator.test.js`
+
+Contributing
+
+- Contributions are welcome. Please open a pull request with a clear description of the change and a short, focused commit message. Run tests locally before opening a PR.
+
 If you'd like help setting up an automated CI workflow, open an issue describing your CI provider.
