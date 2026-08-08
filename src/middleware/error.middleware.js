@@ -1,14 +1,21 @@
 const logger = require("../utils/logger");
 
 module.exports = (err, req, res, next) => {
-  logger.error(err);
+  // If the headers are already sent, delegate to the default Express handler
+  if (res.headersSent) {
+    return next(err);
+  }
+
   const isProduction = process.env.NODE_ENV === "production";
+  const status = Number(err.status) || 500;
+
+  logger.error(err.message || "Unhandled error", isProduction ? null : err.stack);
 
   const payload = {
     error: {
       message: isProduction ? "Server Error" : err.message || "Server Error",
       code: err.code || null,
-      status: err.status || 500,
+      status,
     },
     method: req.method,
     path: req.originalUrl || req.url,
@@ -17,5 +24,5 @@ module.exports = (err, req, res, next) => {
 
   if (!isProduction && err.stack) payload.error.stack = err.stack;
 
-  res.status(payload.error.status).json(payload);
+  res.status(status).json(payload);
 };
