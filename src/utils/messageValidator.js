@@ -1,6 +1,10 @@
 const { MAX_MESSAGE_LENGTH } = require("../config/chat.constants");
 
-const normalizeMessage = (value) => (typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "");
+const normalizeMessage = (value) => {
+  if (value == null) return "";
+  const str = typeof value === "string" ? value : String(value);
+  return str.replace(/\s+/g, " ").trim();
+};
 
 const validateMessage = (value, maxLength = MAX_MESSAGE_LENGTH) => {
   const normalized = normalizeMessage(value);
