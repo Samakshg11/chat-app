@@ -127,8 +127,12 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   const normalizedSender = rawSender ? toObjectIdString(rawSender) : null;
   const normalizedReceiver = receiver ? toObjectIdString(receiver) : null;
   const normalizedMessage = normalizeMessage(message);
-  if (!normalizedSender || !normalizedReceiver) {
-    return badRequest(res, "Missing fields");
+  const missing = [];
+  if (!normalizedSender) missing.push("sender");
+  if (!normalizedReceiver) missing.push("receiver");
+  if (!normalizedMessage) missing.push("message");
+  if (missing.length > 0) {
+    return badRequest(res, `Missing fields: ${missing.join(", ")}`);
   }
   const validationError = validateMessage(normalizedMessage, MAX_MESSAGE_LENGTH);
   if (validationError) {
