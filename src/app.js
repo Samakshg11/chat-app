@@ -8,6 +8,12 @@ app.set("env", process.env.NODE_ENV || "development");
 
 app.use(express.json());
 
+// simple request logging
+app.use((req, res, next) => {
+	console.info(`[req] ${req.method} ${req.originalUrl}`);
+	next();
+});
+
 // serve frontend
 app.use(express.static(path.join(__dirname, "../public")));
 
