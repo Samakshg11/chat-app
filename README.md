@@ -1,5 +1,13 @@
 # Chat-app
 
+Minimal chat API built with Express and Socket.io.
+
+Quick start:
+
+1. Copy `.env.example` to `.env` and configure.
+2. Install deps: `npm install`
+3. Start dev server: `npm run dev`
+
 Minimal chat application using Express and Socket.io.
 
 Getting started
