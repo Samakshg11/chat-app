@@ -8,5 +8,7 @@ const { normalizeMessage, validateMessage } = require("../src/utils/messageValid
   assert.strictEqual(validateMessage("ok", 1), "Message exceeds 1 characters");
   // boundary: exactly allowed length should be accepted
   assert.strictEqual(validateMessage("x", 1), null);
+  // reject punctuation-only messages
+  assert.strictEqual(validateMessage("!!!"), "Message contains no readable characters");
   console.log("messageValidator tests: OK");
 })();
