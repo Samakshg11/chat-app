@@ -9,6 +9,8 @@ const normalizeMessage = (value) => {
 const validateMessage = (value, maxLength = MAX_MESSAGE_LENGTH) => {
   const normalized = normalizeMessage(value);
   if (!normalized) return "Missing message";
+  // disallow messages that are only punctuation
+  if (/^[\p{P}\s]+$/u.test(normalized)) return "Message contains no readable characters";
   if (normalized.length > maxLength) return `Message exceeds ${maxLength} characters`;
   return null;
 };
