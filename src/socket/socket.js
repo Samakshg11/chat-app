@@ -68,8 +68,10 @@ function initSocket(server) {
     cors: { origin: corsOrigin } // cors allow kr diya
   });
 
+  const log = logger.child("socket");
+
   io.on("connection", (socket) => {
-    logger.info("socket:connected", socket.id);
+    log.info("connected", socket.id);
     socket.emit("presence:snapshot", buildPresencePayload());
 
     socket.on("join", (payload) => {
@@ -94,7 +96,7 @@ function initSocket(server) {
         removeUserSocket(socket.id);
         emitPresenceUpdate();
       }
-      logger.info("socket:disconnected", socket.id);
+      log.info("disconnected", socket.id);
     });
   });
 }
