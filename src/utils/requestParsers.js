@@ -7,6 +7,9 @@ const normalizeString = (value) => {
   }
   return typeof value === "string" ? value.trim() : String(value);
 };
+// sanitize path-like input to avoid accidental traversal tokens
+const sanitizePathSegment = (value) => normalizeString(value).replace(/\.\.|\//g, "");
+const safeToObjectIdString = (value) => sanitizePathSegment(value);
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(normalizeString(value));
 const toObjectIdString = (value) => normalizeString(value);
 const toObjectId = (value) => new mongoose.Types.ObjectId(toObjectIdString(value));
@@ -45,4 +48,5 @@ module.exports = {
   parseSortOrder,
   toObjectId,
   toObjectIdString,
+  safeToObjectIdString,
 };
