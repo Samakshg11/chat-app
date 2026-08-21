@@ -136,7 +136,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
   }
   const validationError = validateMessage(normalizedMessage, MAX_MESSAGE_LENGTH);
   if (validationError) {
-    return badRequest(res);
+    return badRequest();
   }
 
   if (!isValidObjectId(normalizedSender) || !isValidObjectId(normalizedReceiver)) {
